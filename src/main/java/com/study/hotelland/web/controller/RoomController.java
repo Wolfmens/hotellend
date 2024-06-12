@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -31,18 +32,21 @@ public class RoomController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN")
     public ResponseEntity<RoomResponse> create(@RequestBody RoomRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(roomMapper.roomEntityToRoomResponse(roomService.create(roomMapper.roomRequestToRoomEntity(request))));
     }
 
     @PutMapping("{id}")
+    @PreAuthorize("hasRole('ADMIN")
     public ResponseEntity<RoomResponse> update(@PathVariable @NotNull Long id, @RequestBody RoomRequest request) {
         return ResponseEntity.ok(roomMapper.roomEntityToRoomResponse
                 (roomService.update(roomMapper.roomRequestToRoomEntity(id,request))));
     }
 
     @DeleteMapping("{id}")
+    @PreAuthorize("hasRole('ADMIN")
     public ResponseEntity<Void> delete(@PathVariable @NotNull Long id) {
         roomService.delete(id);
 

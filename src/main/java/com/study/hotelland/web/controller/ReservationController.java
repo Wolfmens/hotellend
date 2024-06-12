@@ -8,6 +8,7 @@ import com.study.hotelland.web.dto.reservation.ReservationResponseList;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +24,7 @@ public class ReservationController {
     private final ReservationService reservationService;
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN")
     public ResponseEntity<ReservationResponseList> findAll() {
         return ResponseEntity.ok(reservationMapper.reservationListToReservationResponseList(reservationService.findAll()));
     }
