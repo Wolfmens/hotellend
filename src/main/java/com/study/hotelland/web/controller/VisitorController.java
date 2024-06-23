@@ -10,7 +10,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -28,7 +27,7 @@ public class VisitorController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<VisitorResponse> findById(@RequestParam("id") @NotNull Long visitorId) {
+    public ResponseEntity<VisitorResponse> findById(@PathVariable("id") @NotNull Long visitorId) {
         return ResponseEntity.ok(mapper.visitorEntityToVisitorResponse(visitorService.findById(visitorId)));
     }
 
@@ -42,7 +41,7 @@ public class VisitorController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<VisitorResponse> update(@RequestParam("id") @NotNull Long visitorId,
+    public ResponseEntity<VisitorResponse> update(@PathVariable("id") @NotNull Long visitorId,
                                                   @RequestBody VisitorRequest request) {
         return ResponseEntity.ok(
                 mapper.visitorEntityToVisitorResponse(
@@ -50,7 +49,7 @@ public class VisitorController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@RequestParam("id") @NotNull Long visitorId) {
+    public ResponseEntity<Void> delete(@PathVariable("id") @NotNull Long visitorId) {
         visitorService.delete(visitorId);
 
         return ResponseEntity.noContent().build();

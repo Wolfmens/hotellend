@@ -6,7 +6,7 @@ import com.study.hotelland.service.HotelService;
 import com.study.hotelland.web.dto.room.RoomRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.LocalDate;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class RoomMapperDelegate implements RoomMapper {
 
@@ -21,8 +21,12 @@ public abstract class RoomMapperDelegate implements RoomMapper {
         room.setNumber(request.getNumber());
         room.setDescription(request.getDescription());
         room.setMaxPeople(request.getMaxPeople());
-        room.setHotel(hotelService.findById(request.getHotelId()));
-
+        if (request.getHotelId() == null) {
+            room.setHotel(null);
+        } else {
+            room.setHotel(hotelService.findById(request.getHotelId()));
+        }
+        room.setBlockDates(new CopyOnWriteArrayList<>());
         return room;
     }
 

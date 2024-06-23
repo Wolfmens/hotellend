@@ -1,6 +1,5 @@
 package com.study.hotelland.web.dto.hotel;
 
-import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,7 +19,7 @@ public class HotelResponseWithRatingAndNumberRatings {
 
     private Long distanceToCenter;
 
-    private Long hotelRating;
+    private Double hotelRating;
 
     private Long numberRatings;
 

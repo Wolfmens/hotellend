@@ -2,19 +2,25 @@ package com.study.hotelland.web.controller;
 
 import com.study.hotelland.mapper.HotelMapper;
 import com.study.hotelland.service.HotelService;
+import com.study.hotelland.web.dto.filter.HotelFilter;
 import com.study.hotelland.web.dto.hotel.HotelRequest;
 import com.study.hotelland.web.dto.hotel.HotelResponse;
 import com.study.hotelland.web.dto.hotel.HotelResponseList;
+import com.study.hotelland.web.dto.hotel.HotelResponseWithRatingAndNumberRatings;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.validator.constraints.Range;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/hotelland/hotel")
+@Validated
 public class HotelController {
 
     private final HotelMapper hotelMapper;
@@ -33,7 +39,7 @@ public class HotelController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<HotelResponse> create(@RequestBody HotelRequest request) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -41,17 +47,34 @@ public class HotelController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN")
-    public ResponseEntity<HotelResponse> update(@PathVariable(name = "id") @NotNull Long hotelId,@RequestBody HotelRequest request) {
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<HotelResponse> update(@PathVariable(name = "id") @NotNull Long hotelId, @RequestBody HotelRequest request) {
         return ResponseEntity
                 .ok(hotelMapper.hotelEntityToHotelResponse
                         (hotelService.update(hotelMapper.hotelRequestToHotelEntity(hotelId, request))));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Void> deleteById(@PathVariable(name = "id") @NotNull Long hotelId) {
         hotelService.deleteById(hotelId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/rating/{id}")
+    public ResponseEntity<HotelResponseWithRatingAndNumberRatings> addRatingToHotel(@RequestParam
+                                                                                    @Range(min = 1L, max = 5L, message = "The rating " +
+                                                                                            "provided is outside the required range." +
+                                                                                            "Must be from 1 to 5.")
+                                                                                    Long newMark,
+                                                                                    @PathVariable(value = "id") @NotNull Long hotelId) {
+
+        return ResponseEntity.ok(hotelMapper.hotelEntityToHotelResponseWithRatingAndNumberRatings
+                (hotelService.addHotelRating(newMark, hotelId)));
+    }
+
+    @GetMapping("/filter-by")
+    public ResponseEntity<HotelResponseList> filterBy(@Valid HotelFilter filter) {
+        return ResponseEntity.ok(hotelMapper.listHotelEntityToHotelResponseLIst(hotelService.filterBy(filter)));
     }
 }

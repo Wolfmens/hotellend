@@ -22,6 +22,7 @@ public interface RoomMapper {
     @Mapping(source = "roomId", target = "id")
     Room roomRequestToRoomEntity(Long roomId, RoomRequest request);
 
+    @Mapping(target = "hotelId", expression = "java(room.getHotel().getId())")
     RoomResponse roomEntityToRoomResponse(Room room);
 
     default RoomResponseList roomListToRoomResponseList(List<Room> roomList) {

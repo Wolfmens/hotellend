@@ -9,10 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/hotelland/reservation")
@@ -24,13 +21,13 @@ public class ReservationController {
     private final ReservationService reservationService;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<ReservationResponseList> findAll() {
         return ResponseEntity.ok(reservationMapper.reservationListToReservationResponseList(reservationService.findAll()));
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> create(ReservationRequest request) {
+    public ResponseEntity<ReservationResponse> create(@RequestBody ReservationRequest request) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(reservationMapper.reservationEntityToReservationResponse

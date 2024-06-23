@@ -7,8 +7,11 @@ import com.study.hotelland.exception.NotPossibleReservationRoom;
 import com.study.hotelland.repository.ReservationRepository;
 import com.study.hotelland.service.ReservationService;
 import com.study.hotelland.service.RoomService;
+import com.study.hotelland.statistic.event.ReservationRecordEvent;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -16,7 +19,6 @@ import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +27,11 @@ public class ReservationServiceImpl implements ReservationService {
     private final ReservationRepository repository;
 
     private final RoomService roomService;
+
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+
+    @Value("${app.kafka.property.reservationRecordTopic}")
+    private String reservationRecordTopic;
 
     @Override
     public List<Reservation> findAll() {
@@ -50,6 +57,14 @@ public class ReservationServiceImpl implements ReservationService {
         listDatesWhichNeedToReservation.forEach(reservationRoom.getBlockDates()::add);
 
         roomService.update(reservationRoom);
+        reservation.setRoom(reservationRoom);
+
+        ReservationRecordEvent event = new ReservationRecordEvent();
+        event.setVisitorId(reservation.getVisitor().getId());
+        event.setArrivalDate(reservation.getArrival().toString());
+        event.setDepartureDate(reservation.getDeparture().toString());
+
+        kafkaTemplate.send(reservationRecordTopic, event);
 
         return repository.save(reservation);
     }
@@ -94,7 +109,7 @@ public class ReservationServiceImpl implements ReservationService {
         repository.deleteById(id);
     }
 
-    private void isPossibleReservationRoom(CopyOnWriteArrayList<LocalDate> blockDates,
+    private void isPossibleReservationRoom(List<LocalDate> blockDates,
                                            List<LocalDate> listDatesWhichNeedToReservation) {
 
         boolean hasReservationDatedFromChooses =

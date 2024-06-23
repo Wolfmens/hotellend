@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -31,10 +30,11 @@ public class Room {
     @Column(name = "max_people")
     private Long maxPeople;
 
+    @ElementCollection(targetClass = LocalDate.class, fetch = FetchType.EAGER)
     @Column(name = "block_dates")
     @ToString.Exclude
     @Builder.Default
-    private CopyOnWriteArrayList<LocalDate> blockDates = new CopyOnWriteArrayList<>();
+    private List<LocalDate> blockDates = new CopyOnWriteArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "hotel_id")

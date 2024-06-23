@@ -28,7 +28,7 @@ public class Hotel {
     private Long distanceToCenter;
 
     @Column(name = "hotel_rating")
-    private Long hotelRating;
+    private Double hotelRating;
 
     @Column(name = "number_ratings")
     private Long numberRatings;

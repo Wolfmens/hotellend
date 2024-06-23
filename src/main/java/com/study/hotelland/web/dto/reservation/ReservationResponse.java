@@ -2,16 +2,20 @@ package com.study.hotelland.web.dto.reservation;
 
 import com.study.hotelland.web.dto.room.RoomResponse;
 import com.study.hotelland.web.dto.visitor.VisitorResponse;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class ReservationResponse {
 
     private Long id;
 
-    private LocalDate arrival;
+    private String arrival;
 
-    private LocalDate departure;
+    private String departure;
 
     private VisitorResponse visitor;
 

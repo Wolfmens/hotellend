@@ -28,8 +28,8 @@ public class Reservation {
     @ToString.Exclude
     private Visitor visitor;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "visitor_id")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "room_id")
     @ToString.Exclude
     private Room room;
 }

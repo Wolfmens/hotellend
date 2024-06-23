@@ -5,20 +5,30 @@ import com.study.hotelland.entity.Visitor;
 import com.study.hotelland.exception.NotFoundEntityException;
 import com.study.hotelland.repository.VisitorRepository;
 import com.study.hotelland.service.VisitorService;
+import com.study.hotelland.statistic.event.RegistrationVisitorEvent;
 import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.text.MessageFormat;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 public class VisitorServiceImpl implements VisitorService {
 
     private final VisitorRepository repository;
+
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+
+    private final PasswordEncoder passwordEncoder;
+
+    @Value("${app.kafka.property.registrationVisitorTopic}")
+    private String registrationVisitorTopic;
 
     @Override
     public List<Visitor> findAll() {
@@ -38,8 +48,14 @@ public class VisitorServiceImpl implements VisitorService {
             throw new ValidationException("Visitor with the specified name and email already exists!");
         }
         visitor.setAuthority(type);
+        visitor.setPassword(passwordEncoder.encode(visitor.getPassword()));
+        Visitor createdVisitor = repository.save(visitor);
 
-        return repository.save(visitor);
+        RegistrationVisitorEvent event = new RegistrationVisitorEvent();
+        event.setVisitorId(createdVisitor.getId());
+        kafkaTemplate.send(registrationVisitorTopic, event);
+
+        return createdVisitor;
     }
 
     @Override
@@ -53,9 +69,9 @@ public class VisitorServiceImpl implements VisitorService {
             visitorFromDb.setEmail(visitor.getEmail());
         }
         if (StringUtils.hasText(visitor.getPassword())) {
-            visitorFromDb.setPassword(visitor.getPassword());
+            visitorFromDb.setPassword(passwordEncoder.encode(visitor.getPassword()));
         }
-        if (StringUtils.hasText(visitor.getAuthority().name())) {
+        if (visitor.getAuthority() != null && StringUtils.hasText(visitor.getAuthority().name())) {
             visitorFromDb.setAuthority(visitor.getAuthority());
         }
 
